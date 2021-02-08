@@ -3,9 +3,11 @@ import s from './Button.module.css';
 
 function Button({ loadMore }) {
   return (
-    <button type="button" className={s.Button} data-action="load-more" onClick={loadMore}>
-      Load more
-    </button>
+    <div className={s.Container}>
+      <button type="button" className={s.Button} data-action="load-more" onClick={loadMore}>
+        Load more
+      </button>
+    </div>
   );
 }
 

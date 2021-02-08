@@ -1,22 +1,16 @@
 import { Component } from 'react';
 import Loader from 'react-loader-spinner';
 
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import fetchPicture from 'services/pixabayAPI';
 import ImageGallery from 'components/ImageGallery';
 import ImageGalleryItem from 'components/ImageGalleryItem';
-import Button from 'components/Button/Button';
-
-// const Status = {
-//   IDLE: 'idle',
-//   PENDING: 'pending',
-//   RESOLVED: 'resolved',
-//   REJECTED: 'rejected',
-// };
+import Button from 'components/Button';
+import Modal from 'components/Modal';
 
 class BodyGallery extends Component {
   state = {
-    hits: null,
+    hits: [],
     search: '',
     page: 1,
     messenge: 'Все пропало',
@@ -34,9 +28,19 @@ class BodyGallery extends Component {
 
     if (prevSearch !== nextSearch) {
       this.setState({ loading: true, page: 1 });
+
       fetchPicture(nextSearch, this.state.page)
-        .then(data => this.setState({ hits: data.hits, page: prevState.page + 1 }))
-        .catch(error => this.setState({ error: true }))
+        .then(data => {
+          this.setState({
+            hits: data.hits,
+            page: prevState.page + 1,
+            totalHits: data.totalHits,
+          });
+        })
+        .catch(error => {
+          this.setState({ error: true });
+          toast.error(`По запросу ${nextSearch} ничего не найдено`);
+        })
         .finally(() => this.setState({ loading: false }));
     }
   }
@@ -49,10 +53,6 @@ class BodyGallery extends Component {
       hits: prevState.hits,
     }));
 
-    // console.log(this.state.hits);
-    // console.log(this.state.search);
-    // console.log(this.state.page);
-
     fetchPicture(search, this.state.page)
       .then(({ hits }) => {
         this.setState(prevState => ({
@@ -60,7 +60,10 @@ class BodyGallery extends Component {
           page: prevState.page + 1,
         }));
       })
-      .catch(error => this.setState({ error }))
+      .catch(error => {
+        this.setState({ error: true });
+        toast.error(`По запросу ${search} ничего не найдено`);
+      })
       .finally(() => this.setState({ loading: false }));
   };
 
@@ -68,32 +71,49 @@ class BodyGallery extends Component {
     this.setState({ search: name });
   };
 
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
+  };
+
   loadMore = () => {
     this.getDataForGallery();
-    // this.scrollPageToEnd();
+    this.scrollPageToEnd();
+  };
+
+  scrollPageToEnd = () => {
+    setTimeout(() => {
+      window.scrollBy({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    }, 500);
   };
 
   onClickGalleryItem = (src, alt) => {
-    // this.toggleModal();
+    this.toggleModal();
     this.setState({ imageForModal: src, title: alt });
   };
 
   render() {
-    const { hits, loading } = this.state;
+    const { hits, loading, showModal, imageForModal, title, totalHits } = this.state;
 
     return (
       <>
         <ImageGallery>
-          {hits && <ImageGalleryItem hits={hits} onClickGalleryItem={this.onClickGalleryItem} />}
+          {hits.length !== 0 && (
+            <ImageGalleryItem hits={hits} onClickGalleryItem={this.onClickGalleryItem} />
+          )}
         </ImageGallery>
 
         {loading === true && <Loader type="Rings" color="#00BFFF" height={200} width={200} />}
-        {hits && <Button loadMore={this.loadMore} />}
-        {/* {showModal && (
+        {hits.length > 0 && hits.length < totalHits && <Button loadMore={this.loadMore} />}
+        {showModal && (
           <Modal onClick={this.onClickGalleryItem}>
             <img src={imageForModal} alt={title} />
           </Modal>
-        )} */}
+        )}
       </>
     );
   }
