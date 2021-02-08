@@ -31,6 +31,9 @@ class BodyGallery extends Component {
 
       fetchPicture(nextSearch, this.state.page)
         .then(data => {
+          if (data.totalHits === 0) {
+            toast.error(`По запросу ${nextSearch} ничего не найдено`);
+          }
           this.setState({
             hits: data.hits,
             page: prevState.page + 1,
@@ -62,7 +65,6 @@ class BodyGallery extends Component {
       })
       .catch(error => {
         this.setState({ error: true });
-        toast.error(`По запросу ${search} ничего не найдено`);
       })
       .finally(() => this.setState({ loading: false }));
   };
