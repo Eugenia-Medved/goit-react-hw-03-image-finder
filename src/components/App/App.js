@@ -20,7 +20,7 @@ class App extends Component {
       <>
         <Searchbar onSubmit={this.addSearch} />
         <BodyGallery search={search} />
-        <ToastContainer position="top-center" />
+        <ToastContainer position="top-right" />
       </>
     );
   }
