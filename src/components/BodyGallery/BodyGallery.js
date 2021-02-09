@@ -27,8 +27,12 @@ class BodyGallery extends Component {
     const nextSearch = this.props.search;
 
     if (prevSearch !== nextSearch) {
-      this.setState({ loading: true, page: 1 });
-      this.loadData(nextSearch, this.state.page);
+      this.setState({ loading: true });
+      this.loadData(nextSearch, 1);
+    }
+
+    if (prevState.hits.length < this.state.hits.length) {
+      this.scrollPageToEnd();
     }
   }
 
@@ -72,16 +76,13 @@ class BodyGallery extends Component {
 
   loadMore = () => {
     this.getDataForGallery();
-    this.scrollPageToEnd();
   };
 
   scrollPageToEnd = () => {
-    setTimeout(() => {
-      window.scrollBy({
-        top: document.documentElement.scrollHeight,
-        behavior: 'smooth',
-      });
-    }, 500);
+    window.scrollBy({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   };
 
   onClickGalleryItem = (src, alt) => {
